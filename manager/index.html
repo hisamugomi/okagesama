@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>おかげさま — 管理者</title>
+<style>
+ :root {
+   --warm: #F4845F;
+   --warm-light: #FFF0EB;
+   --green: #4A7C59;
+   --green-light: #E8F5E9;
+   --cream: #FFF8F0;
+   --text: #2D2D2D;
+   --text-light: #666;
+   --border: #E0D5C9;
+   --shadow: rgba(0,0,0,0.08);
+ }
+
+
+ * { margin: 0; padding: 0; box-sizing: border-box; }
+
+
+ body {
+   font-family: "Hiragino Kaku Gothic ProN", "Noto Sans JP", -apple-system, sans-serif;
+   background: var(--cream);
+   color: var(--text);
+   min-height: 100vh;
+ }
+
+
+ /* Navigation */
+ nav {
+   background: white;
+   border-bottom: 2px solid var(--border);
+   padding: 12px 20px;
+   display: flex;
+   gap: 8px;
+   align-items: center;
+   position: sticky;
+   top: 0;
+   z-index: 100;
+   box-shadow: 0 2px 8px var(--shadow);
+ }
+ nav button {
+   padding: 10px 20px;
+   border: 2px solid var(--border);
+   border-radius: 24px;
+   background: white;
+   font-size: 16px;
+   cursor: pointer;
+   transition: all 0.2s;
+   white-space: nowrap;
+ }
+ nav button:hover { background: var(--warm-light); }
+ nav button.active {
+   background: var(--warm);
+   color: white;
+   border-color: var(--warm);
+ }
+ .nav-title {
+   font-size: 20px;
+   font-weight: 700;
+   margin-right: auto;
+   color: var(--warm);
+ }
+ .nav-user-link {
+   margin-left: auto;
+   font-size: 13px;
+   color: var(--text-light);
+   text-decoration: none;
+   padding: 6px 12px;
+   border-radius: 12px;
+   border: 1px solid var(--border);
+   white-space: nowrap;
+ }
+ .nav-user-link:hover {
+   background: var(--warm-light);
+   color: var(--warm);
+   border-color: var(--warm);
+ }
+
+
+ /* Views */
+ .view { display: none; padding: 24px; max-width: 800px; margin: 0 auto; }
+ .view.active { display: block; }
+
+
+ /* Dashboard View */
+ .dashboard-header {
+   text-align: center;
+   margin-bottom: 32px;
+ }
+ .dashboard-header h1 {
+   font-size: 28px;
+   color: var(--warm);
+   margin-bottom: 4px;
+ }
+ .stats-row {
+   display: grid;
+   grid-template-columns: repeat(3, 1fr);
+   gap: 12px;
+   margin-bottom: 28px;
+ }
+ .stat-card {
+   background: white;
+   border-radius: 16px;
+   padding: 20px;
+   text-align: center;
+   border: 2px solid var(--border);
+ }
+ .stat-number {
+   font-size: 36px;
+   font-weight: 700;
+   color: var(--warm);
+ }
+ .stat-label {
+   font-size: 13px;
+   color: var(--text-light);
+   margin-top: 4px;
+ }
+
+
+ /* Relationship Web (SVG) */
+ .web-container {
+   background: white;
+   border-radius: 20px;
+   border: 2px solid var(--border);
+   padding: 20px;
+   margin-bottom: 28px;
+ }
+ .web-container h3 {
+   font-size: 18px;
+   margin-bottom: 16px;
+   color: var(--text);
+ }
+ .web-svg {
+   width: 100%;
+   height: 400px;
+ }
+
+
+ /* Gratitude Feed */
+ .feed-container {
+   margin-bottom: 28px;
+ }
+ .feed-container h3 {
+   font-size: 18px;
+   margin-bottom: 16px;
+ }
+ .feed-item {
+   background: white;
+   border: 2px solid var(--border);
+   border-radius: 16px;
+   padding: 16px;
+   margin-bottom: 10px;
+   display: flex;
+   gap: 12px;
+   align-items: flex-start;
+ }
+ .feed-avatar {
+   width: 40px;
+   height: 40px;
+   border-radius: 50%;
+   background: var(--warm-light);
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   font-size: 18px;
+   flex-shrink: 0;
+ }
+ .feed-content { flex: 1; }
+ .feed-names {
+   font-weight: 600;
+   margin-bottom: 4px;
+   font-size: 15px;
+ }
+ .feed-names .arrow { color: var(--warm); margin: 0 6px; }
+ .feed-message {
+   color: var(--text-light);
+   font-size: 14px;
+   margin-bottom: 4px;
+ }
+ .feed-meta {
+   font-size: 12px;
+   color: #999;
+ }
+
+
+ /* ── Alert System ── */
+ .alert-section { margin-bottom: 28px; }
+ .alert-section h3 { font-size: 18px; margin-bottom: 6px; }
+ .alert-section .section-desc { font-size: 13px; color: var(--text-light); margin-bottom: 16px; }
+ .alert-card {
+   background: white; border-radius: 16px; padding: 20px; margin-bottom: 12px;
+   border-left: 5px solid #ccc; display: flex; gap: 16px; align-items: flex-start;
+   transition: all 0.2s;
+ }
+ .alert-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-1px); }
+ .alert-card.risk-high { border-left-color: #D32F2F; background: #FFF5F5; }
+ .alert-card.risk-medium { border-left-color: #F9A825; background: #FFFDE7; }
+ .alert-card.risk-low { border-left-color: var(--green); background: var(--green-light); }
+ .alert-avatar {
+   width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center;
+   justify-content: center; font-size: 22px; flex-shrink: 0; position: relative;
+ }
+ .alert-card.risk-high .alert-avatar { background: #FFCDD2; }
+ .alert-card.risk-medium .alert-avatar { background: #FFF9C4; }
+ .alert-card.risk-low .alert-avatar { background: #C8E6C9; }
+ .alert-body { flex: 1; }
+ .alert-name { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+ .alert-score {
+   display: inline-block; padding: 2px 10px; border-radius: 10px;
+   font-size: 12px; font-weight: 700; margin-left: 8px;
+ }
+ .risk-high .alert-score { background: #D32F2F; color: white; }
+ .risk-medium .alert-score { background: #F9A825; color: #333; }
+ .risk-low .alert-score { background: var(--green); color: white; }
+ .alert-reason { font-size: 14px; color: var(--text-light); margin-bottom: 8px; line-height: 1.5; }
+ .alert-features { display: flex; flex-wrap: wrap; gap: 6px; }
+ .feature-tag {
+   font-size: 11px; padding: 3px 8px; border-radius: 8px;
+   background: rgba(0,0,0,0.06); color: var(--text-light); white-space: nowrap;
+ }
+ .feature-tag.danger { background: #FFCDD2; color: #B71C1C; }
+ .feature-tag.warn { background: #FFF9C4; color: #F57F17; }
+ .feature-tag.ok { background: #C8E6C9; color: #1B5E20; }
+
+
+ /* Rules legend */
+ .rules-legend {
+   background: white; border: 2px solid var(--border); border-radius: 16px;
+   padding: 20px; margin-bottom: 28px;
+ }
+ .rules-legend h3 { font-size: 16px; margin-bottom: 12px; color: var(--warm); }
+ .rule-row {
+   display: flex; align-items: flex-start; gap: 10px; padding: 6px 0;
+   font-size: 13px; color: var(--text-light); border-bottom: 1px solid var(--border);
+ }
+ .rule-row:last-child { border-bottom: none; }
+ .rule-dot {
+   width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px;
+ }
+ .rule-dot.high   { background: #D32F2F; }
+ .rule-dot.medium { background: #F9A825; }
+ .rule-dot.low    { background: var(--green); }
+
+
+ /* Pipeline Info */
+ .pipeline-info {
+   background: white;
+   border: 2px solid var(--border);
+   border-radius: 16px;
+   padding: 20px;
+   margin-bottom: 20px;
+ }
+ .pipeline-info h3 { font-size: 16px; margin-bottom: 14px; color: var(--warm); }
+ .pipeline-step {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+   padding: 8px 0;
+   font-size: 14px;
+   color: var(--text);
+   border-bottom: 1px solid var(--border);
+ }
+ .pipeline-step:last-child { border-bottom: none; }
+ .step-dot {
+   width: 10px;
+   height: 10px;
+   border-radius: 50%;
+   background: var(--green);
+   flex-shrink: 0;
+ }
+ .step-dot.running {
+   background: var(--warm);
+   animation: pulse 1s ease-in-out infinite;
+ }
+ @keyframes pulse {
+   0%, 100% { opacity: 1; }
+   50% { opacity: 0.25; }
+ }
+
+
+ /* Pipeline Metrics */
+ .pipeline-metrics {
+   display: grid;
+   grid-template-columns: repeat(4, 1fr);
+   gap: 12px;
+   margin-top: 16px;
+ }
+ .pipeline-metric {
+   background: var(--cream);
+   border-radius: 12px;
+   padding: 14px;
+   text-align: center;
+ }
+ .pm-val {
+   font-size: 28px;
+   font-weight: 700;
+   color: var(--warm);
+ }
+ .pm-label {
+   font-size: 12px;
+   color: var(--text-light);
+   margin-top: 4px;
+ }
+
+
+ /* Coefficient Chart */
+ .coeff-chart { display: flex; flex-direction: column; gap: 10px; }
+ .coeff-row {
+   display: flex;
+   align-items: center;
+   gap: 10px;
+ }
+ .coeff-label {
+   width: 200px;
+   flex-shrink: 0;
+   font-size: 12px;
+   color: var(--text-light);
+ }
+ .coeff-bar-wrap {
+   flex: 1;
+   background: var(--cream);
+   border-radius: 4px;
+   height: 14px;
+   overflow: hidden;
+ }
+ .coeff-bar {
+   height: 100%;
+   border-radius: 4px;
+   min-width: 2px;
+   transition: width 0.4s ease;
+ }
+ .coeff-bar.positive { background: #D32F2F; }
+ .coeff-bar.negative { background: var(--green); }
+ .coeff-val {
+   width: 52px;
+   flex-shrink: 0;
+   text-align: right;
+   font-size: 12px;
+   font-weight: 600;
+   color: var(--text);
+ }
+
+
+ /* ── Touch & Focus ── */
+ nav button, .nav-user-link {
+   touch-action: manipulation;
+   -webkit-tap-highlight-color: transparent;
+ }
+ :focus-visible {
+   outline: 3px solid var(--warm);
+   outline-offset: 2px;
+   border-radius: 4px;
+ }
+ nav button { min-height: 44px; }
+ .nav-user-link { min-height: 44px; display: flex; align-items: center; }
+
+ @media (max-width: 600px) {
+   nav { flex-wrap: wrap; padding: 10px 14px; gap: 6px; }
+   nav button { padding: 10px 16px; font-size: 15px; }
+   .nav-title { font-size: 17px; }
+   .dashboard-header h1 { font-size: 24px; }
+   .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+   .stat-number { font-size: 28px; }
+   .web-svg { height: 260px; }
+   .alert-card { padding: 14px 12px; gap: 10px; }
+   .alert-name { font-size: 15px; }
+   .pipeline-metrics { grid-template-columns: repeat(2, 1fr); }
+ }
+ @media (max-width: 360px) {
+   nav button { padding: 8px 12px; font-size: 14px; }
+   .stats-row { grid-template-columns: repeat(3, 1fr); }
+   .stat-number { font-size: 24px; }
+ }
+
+ /* Screen-reader only utility */
+ .sr-only {
+   position: absolute; width: 1px; height: 1px;
+   padding: 0; margin: -1px; overflow: hidden;
+   clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+ }
+</style>
+</head>
+<body>
+
+
+<nav aria-label="メインナビ">
+ <span class="nav-title">おかげさま</span>
+ <button class="active" onclick="showView('dashboard')">コミュニティ</button>
+ <button onclick="showView('alerts')">アラート</button>
+ <a href="../user/" class="nav-user-link">ユーザーへ</a>
+</nav>
+
+
+<!-- DASHBOARD VIEW -->
+<div id="view-dashboard" class="view active">
+ <div class="dashboard-header">
+   <h1>コミュニティのつながり</h1>
+   <p>Community Connection Dashboard</p>
+ </div>
+
+
+ <div class="stats-row" id="stats-row" role="region" aria-label="統計"></div>
+
+
+ <div class="web-container">
+   <h3>つながりの輪 / Relationship Web</h3>
+   <svg class="web-svg" id="web-svg"></svg>
+ </div>
+
+
+ <div class="feed-container">
+   <h3>感謝のながれ / Gratitude Feed</h3>
+   <div id="gratitude-feed"></div>
+ </div>
+</div>
+
+
+<!-- ALERTS VIEW (Rule-based) -->
+<div id="view-alerts" class="view">
+ <div class="dashboard-header">
+   <h1>孤立リスク検知</h1>
+   <p>Loneliness Risk Detection — Rule-based System</p>
+ </div>
+
+
+ <div class="rules-legend">
+   <h3>判定ルール / Risk Rules</h3>
+   <div class="rule-row">
+     <div class="rule-dot high"></div>
+     <span><strong>高リスク (High)</strong> — 14日以上不参加、または5回以上連続欠席</span>
+   </div>
+   <div class="rule-row">
+     <div class="rule-dot medium"></div>
+     <span><strong>中リスク (Medium)</strong> — 7〜13日不参加、または3〜4回連続欠席、またはつながりゼロ、または感謝がゼロで参加が少ない</span>
+   </div>
+   <div class="rule-row">
+     <div class="rule-dot low"></div>
+     <span><strong>低リスク (Low)</strong> — 定期的に参加し、つながりがある</span>
+   </div>
+ </div>
+
+
+ <div class="alert-section">
+   <h3>要注意メンバー / At-Risk Members</h3>
+   <p class="section-desc">Sorted by risk level (highest first)</p>
+   <div id="alert-list"></div>
+ </div>
+</div>
+
+
+<script src="../config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ── DATA ──
+const SUPABASE_TABLE = 'reviews';
+const SUPABASE_CHECKINS_TABLE = 'checkins';
+
+
+const supabaseClient = (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase)
+ ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+ : null;
+
+
+const DEFAULT_MEMBERS = [
+ { id: 'tanaka', name: '田中さん', emoji: '👵', nameEn: 'Tanaka-san' },
+ { id: 'yamada', name: '山田さん', emoji: '👴', nameEn: 'Yamada-san' },
+ { id: 'suzuki', name: '鈴木さん', emoji: '👵', nameEn: 'Suzuki-san' },
+ { id: 'sato',   name: '佐藤さん', emoji: '👴', nameEn: 'Satō-san' },
+ { id: 'ito',    name: '伊藤さん', emoji: '👵', nameEn: 'Itō-san' },
+ { id: 'watanabe', name: '渡辺さん', emoji: '👴', nameEn: 'Watanabe-san' },
+ { id: 'takahashi', name: '高橋さん', emoji: '👵', nameEn: 'Takahashi-san' },
+ { id: 'kobayashi', name: '小林さん', emoji: '👴', nameEn: 'Kobayashi-san' },
+];
+
+
+let MEMBERS = [];
+let storeCache = { checkins: [], thanks: [] };
+const LOCAL_KEY = 'okagesama';
+
+
+const SAMPLE_MESSAGES = [
+ 'いつもお漬物ありがとうございます',
+ '体操を教えてくれてありがとう',
+ '話を聞いてくれてありがとう',
+ 'いつも笑顔をありがとう',
+ '一緒に歩いてくれてありがとう',
+ 'お花を持ってきてくれてありがとう',
+ 'いつも声をかけてくれてありがとう',
+ '料理を分けてくれてありがとう',
+ '相談に乗ってくれてありがとう',
+ 'いつも元気をもらっています',
+];
+
+
+const GATHERING_NAMES = {
+ radio: 'ラジオ体操',
+ salon: 'いこいのサロン',
+ shokudo: 'こども食堂',
+ chonaikai: '町内会',
+ other: 'その他',
+};
+
+
+function getStore() {
+ const raw = localStorage.getItem(LOCAL_KEY);
+ if (raw) return JSON.parse(raw);
+ // Seed demo data
+ const seed = { checkins: [], thanks: [] };
+ const now = Date.now();
+ const day = 86400000;
+ const gatherings = ['radio','salon','chonaikai','shokudo'];
+ // Generate ~30 days of demo data
+ for (let d = 30; d >= 1; d--) {
+   const date = new Date(now - d * day).toISOString().split('T')[0];
+   // 1-2 gatherings per day on some days
+   if (d % 2 === 0 || d % 3 === 0) {
+     const g = gatherings[d % gatherings.length];
+     // 4-6 random attendees
+     const shuffled = [...DEFAULT_MEMBERS].sort(() => Math.random() - 0.5);
+     const count = 4 + Math.floor(Math.random() * 3);
+     const attendees = shuffled.slice(0, count);
+     attendees.forEach(m => {
+       seed.checkins.push({ memberId: m.id, gathering: g, date, ts: now - d * day + Math.random() * 3600000 });
+     });
+     // 2-4 thanks per gathering
+     const thanksCount = 2 + Math.floor(Math.random() * 3);
+     for (let t = 0; t < thanksCount; t++) {
+       const from = attendees[Math.floor(Math.random() * attendees.length)];
+       let to = attendees[Math.floor(Math.random() * attendees.length)];
+       while (to.id === from.id) to = attendees[Math.floor(Math.random() * attendees.length)];
+       seed.thanks.push({
+         fromId: from.id,
+         toId: to.id,
+         message: SAMPLE_MESSAGES[Math.floor(Math.random() * SAMPLE_MESSAGES.length)],
+         gathering: g,
+         date,
+         ts: now - d * day + Math.random() * 3600000,
+       });
+     }
+   }
+ }
+ localStorage.setItem(LOCAL_KEY, JSON.stringify(seed));
+ return seed;
+}
+
+
+function saveStore(store) {
+ localStorage.setItem(LOCAL_KEY, JSON.stringify(store));
+}
+
+
+function getMember(id) {
+ return MEMBERS.find(m => m.id === id);
+}
+
+
+function memberIdFromName(name) {
+ if (!name) return '';
+ return name.trim().toLowerCase().replace(/\s+/g, '-');
+}
+
+
+function toTsMs(value) {
+ if (!value) return 0;
+ return typeof value === 'number' ? value : new Date(value).getTime();
+}
+
+
+function normalizeCheckin(row) {
+ return {
+   memberId: row.member_id || row.memberId,
+   gathering: row.gathering,
+   date: row.date,
+   ts: row.ts,
+ };
+}
+
+
+function normalizeThanks(row) {
+ let parsed = null;
+ if (row.description) {
+   try {
+     parsed = JSON.parse(row.description);
+   } catch (e) {
+     parsed = null;
+   }
+ }
+ const toName = (parsed && parsed.toName) ? parsed.toName : (row.name || '');
+ const fromName = (parsed && parsed.fromName) ? parsed.fromName : '参加者';
+ const message = (parsed && parsed.message) ? parsed.message : (row.description || '');
+ const tsValue = row.created_at || row.updated_at || row.ts;
+ const dateValue = tsValue ? new Date(tsValue).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+ return {
+   fromId: (parsed && parsed.fromId) ? parsed.fromId : memberIdFromName(fromName),
+   toId: (parsed && parsed.toId) ? parsed.toId : memberIdFromName(toName),
+   fromName,
+   toName,
+   message,
+   gathering: row.event_name || row.gathering || 'other',
+   date: dateValue,
+   ts: tsValue,
+ };
+}
+
+
+function buildMembersFromStore(store) {
+ const map = new Map();
+ DEFAULT_MEMBERS.forEach(m => map.set(m.id, { ...m }));
+ store.thanks.forEach(t => {
+   if (t.fromName) {
+     const id = t.fromId || memberIdFromName(t.fromName);
+     if (id && !map.has(id)) {
+       map.set(id, { id, name: t.fromName, emoji: '🙂', nameEn: t.fromName });
+     }
+   }
+   if (t.toName) {
+     const id = t.toId || memberIdFromName(t.toName);
+     if (id && !map.has(id)) {
+       map.set(id, { id, name: t.toName, emoji: '🙂', nameEn: t.toName });
+     }
+   }
+ });
+ MEMBERS = Array.from(map.values());
+ return MEMBERS;
+}
+
+
+async function fetchStore() {
+ if (!supabaseClient) {
+   storeCache = getStore();
+   return storeCache;
+ }
+ const localStore = getStore();
+ const [checkinsResult, thanksResult] = await Promise.all([
+   supabaseClient
+     .from(SUPABASE_CHECKINS_TABLE)
+     .select('*')
+     .order('created_at', { ascending: false })
+     .limit(500),
+   supabaseClient
+     .from(SUPABASE_TABLE)
+     .select('*')
+     .order('created_at', { ascending: false })
+     .limit(500),
+ ]);
+ const checkins = checkinsResult.error
+   ? localStore.checkins.map(normalizeCheckin)
+   : (checkinsResult.data || []).map(normalizeCheckin);
+ const thanks = thanksResult.error
+   ? localStore.thanks
+   : (thanksResult.data || []).map(normalizeThanks);
+ storeCache = { checkins, thanks };
+ buildMembersFromStore(storeCache);
+ return storeCache;
+}
+
+
+async function addCheckin(memberId, gathering) {
+ const today = new Date().toISOString().split('T')[0];
+ const ts = new Date().toISOString();
+ const store = getStore();
+ store.checkins.push({ memberId, gathering, date: today, ts: Date.now() });
+ saveStore(store);
+ storeCache.checkins = store.checkins;
+ if (supabaseClient) {
+   const { error } = await supabaseClient
+     .from(SUPABASE_CHECKINS_TABLE)
+     .insert({ member_id: memberId, gathering, date: today, created_at: ts });
+   if (error) console.warn('Supabase checkin save error:', error);
+ }
+}
+
+
+async function addThanks(fromId, toId, message, gathering) {
+ const today = new Date().toISOString().split('T')[0];
+ const ts = new Date().toISOString();
+ const fromMember = getMember(fromId);
+ const toMember = getMember(toId);
+ const fromName = fromMember ? fromMember.name : '参加者';
+ const toName = toMember ? toMember.name : toId;
+ if (!supabaseClient) {
+   const store = getStore();
+   store.thanks.push({ fromId, toId, fromName, toName, message, gathering, date: today, ts: Date.now() });
+   saveStore(store);
+   storeCache = store;
+   return;
+ }
+ const payload = {
+   name: toName,
+   description: JSON.stringify({ fromId, fromName, toId, toName, message }),
+   event_name: gathering,
+   created_at: ts,
+   updated_at: ts,
+ };
+ const { data, error } = await supabaseClient.from(SUPABASE_TABLE).insert(payload).select().single();
+ if (!error && data) {
+   const normalized = normalizeThanks(data);
+   storeCache.thanks.push(normalized);
+   buildMembersFromStore(storeCache);
+ }
+}
+
+
+// ── VIEWS ──
+async function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('nav button').forEach((b, i) => {
+    b.classList.remove('active');
+    const viewMap = { dashboard: 0, alerts: 1 };
+    b.classList.toggle('active', i === viewMap[name]);
+  });
+  if (name === 'dashboard') await renderDashboard();
+  if (name === 'alerts') await runAndRenderPipeline();
+}
+
+
+// ── DASHBOARD ──
+async function renderDashboard() {
+ const store = await fetchStore();
+ const now = Date.now();
+ const thirtyDays = 30 * 86400000;
+
+
+ // Stats
+ const recentThanks = store.thanks.filter(t => now - toTsMs(t.ts) < thirtyDays);
+ const recentCheckins = store.checkins.filter(c => now - toTsMs(c.ts) < thirtyDays);
+ const uniqueParticipants = new Set(recentCheckins.map(c => c.memberId)).size;
+
+
+ document.getElementById('stats-row').innerHTML = `
+   <div class="stat-card">
+     <div class="stat-number">${recentThanks.length}</div>
+     <div class="stat-label">感謝の数<br>Thanks shared</div>
+   </div>
+   <div class="stat-card">
+     <div class="stat-number">${uniqueParticipants}</div>
+     <div class="stat-label">参加者<br>Participants</div>
+   </div>
+   <div class="stat-card">
+     <div class="stat-number">${recentCheckins.length}</div>
+     <div class="stat-label">チェックイン<br>Check-ins</div>
+   </div>
+ `;
+
+
+ // Relationship Web
+ renderWeb(recentThanks);
+
+
+ // Gratitude Feed (most recent first)
+ const feed = [...store.thanks].sort((a, b) => toTsMs(b.ts) - toTsMs(a.ts)).slice(0, 20);
+ document.getElementById('gratitude-feed').innerHTML = feed.map(t => {
+   const from = getMember(t.fromId) || { name: t.fromName || '参加者', emoji: '🙂' };
+   const to = getMember(t.toId) || { name: t.toName || t.toId, emoji: '🙂' };
+   if (!from || !to) return '';
+   const d = new Date(t.ts);
+   const dateStr = `${d.getMonth()+1}/${d.getDate()} ${GATHERING_NAMES[t.gathering] || ''}`;
+   return `
+     <div class="feed-item">
+       <div class="feed-avatar">${from.emoji}</div>
+       <div class="feed-content">
+         <div class="feed-names">${from.name} <span class="arrow">→</span> ${to.name}</div>
+         <div class="feed-message">${t.message}</div>
+         <div class="feed-meta">${dateStr}</div>
+       </div>
+     </div>
+   `;
+ }).join('');
+}
+
+
+function renderWeb(thanks) {
+ const svg = document.getElementById('web-svg');
+ const w = svg.clientWidth || 700;
+ const h = 400;
+ const cx = w / 2;
+ const cy = h / 2;
+ const r = Math.min(w, h) * 0.35;
+
+
+ // Count thanks received per member
+ const received = {};
+ const connections = {};
+ MEMBERS.forEach(m => { received[m.id] = 0; });
+
+
+ thanks.forEach(t => {
+   received[t.toId] = (received[t.toId] || 0) + 1;
+   const key = [t.fromId, t.toId].sort().join('-');
+   connections[key] = (connections[key] || 0) + 1;
+ });
+
+
+ // Position members in circle
+ const positions = {};
+ MEMBERS.forEach((m, i) => {
+   const angle = (i / MEMBERS.length) * Math.PI * 2 - Math.PI / 2;
+   positions[m.id] = {
+     x: cx + r * Math.cos(angle),
+     y: cy + r * Math.sin(angle),
+   };
+ });
+
+
+ let html = '';
+
+
+ // Draw connections
+ Object.entries(connections).forEach(([key, count]) => {
+   const [a, b] = key.split('-');
+   const pa = positions[a];
+   const pb = positions[b];
+   if (!pa || !pb) return;
+   const opacity = Math.min(0.15 + count * 0.12, 0.9);
+   const width = Math.min(1 + count * 0.8, 6);
+   html += `<line x1="${pa.x}" y1="${pa.y}" x2="${pb.x}" y2="${pb.y}"
+     stroke="#F4845F" stroke-width="${width}" stroke-opacity="${opacity}" stroke-linecap="round"/>`;
+ });
+
+
+ // Draw nodes
+ MEMBERS.forEach(m => {
+   const p = positions[m.id];
+   const count = received[m.id] || 0;
+   const nodeR = 22 + count * 2.5;
+   html += `
+     <circle cx="${p.x}" cy="${p.y}" r="${nodeR}" fill="#FFF0EB" stroke="#F4845F" stroke-width="2.5"/>
+     <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" font-size="18">${m.emoji}</text>
+     <text x="${p.x}" y="${p.y + nodeR + 16}" text-anchor="middle" font-size="13" fill="#2D2D2D" font-weight="600">${m.name}</text>
+     <text x="${p.x}" y="${p.y + nodeR + 30}" text-anchor="middle" font-size="11" fill="#999">${count}回感謝</text>
+   `;
+ });
+
+
+ svg.innerHTML = html;
+}
+
+
+// ── RULE-BASED RISK ASSESSMENT ──
+function assessRisk(memberId, store) {
+ const now = Date.now();
+ const day = 86400000;
+ const thirtyDays = 30 * day;
+
+ const myCheckins = store.checkins.filter(c => c.memberId === memberId);
+ const recentCheckins = myCheckins.filter(c => (now - toTsMs(c.ts)) < thirtyDays);
+
+ // Days since last check-in
+ const lastTs = myCheckins.length > 0 ? Math.max(...myCheckins.map(c => toTsMs(c.ts))) : now - 60 * day;
+ const daysSinceLast = (now - lastTs) / day;
+
+ // Consecutive missed gathering slots (~every 3.5 days)
+ let consecutiveMisses = 0;
+ for (let slot = 0; slot < 8; slot++) {
+   const slotStart = now - (slot + 1) * 3.5 * day;
+   const slotEnd   = now - slot * 3.5 * day;
+   const attended  = myCheckins.some(c => { const t = toTsMs(c.ts); return t >= slotStart && t < slotEnd; });
+   if (!attended) consecutiveMisses++;
+   else break;
+ }
+
+ // Thanks and connections in last 30 days
+ const toMe   = store.thanks.filter(t => t.toId   === memberId && (now - toTsMs(t.ts)) < thirtyDays);
+ const fromMe = store.thanks.filter(t => t.fromId === memberId && (now - toTsMs(t.ts)) < thirtyDays);
+ const thanksReceived = toMe.length;
+ const thanksSent     = fromMe.length;
+ const connections    = new Set([...toMe.map(t => t.fromId), ...fromMe.map(t => t.toId)]).size;
+
+ // ── Rules (worst trigger wins) ──
+ const triggers = [];
+
+ // High-risk rules
+ if (daysSinceLast >= 14)      triggers.push({ level: 'high',   text: `${Math.round(daysSinceLast)}日間不参加` });
+ if (consecutiveMisses >= 5)   triggers.push({ level: 'high',   text: `${consecutiveMisses}回連続欠席` });
+
+ // Medium-risk rules
+ if (daysSinceLast >= 7 && daysSinceLast < 14)       triggers.push({ level: 'medium', text: `${Math.round(daysSinceLast)}日間不参加` });
+ if (consecutiveMisses >= 3 && consecutiveMisses < 5) triggers.push({ level: 'medium', text: `${consecutiveMisses}回連続欠席` });
+ if (connections === 0 && thanksReceived === 0)        triggers.push({ level: 'medium', text: 'つながりがゼロ' });
+ if (thanksReceived === 0 && recentCheckins.length < 4) triggers.push({ level: 'medium', text: '感謝がなく参加も少ない' });
+
+ let riskLevel = 'low';
+ if (triggers.some(t => t.level === 'high'))        riskLevel = 'high';
+ else if (triggers.some(t => t.level === 'medium')) riskLevel = 'medium';
+
+ const reasons = triggers.length > 0 ? triggers.map(t => t.text) : ['定期的に参加・交流あり'];
+
+ return { riskLevel, reasons, daysSinceLast, consecutiveMisses, recentCheckins: recentCheckins.length, thanksReceived, thanksSent, connections };
+}
+
+
+// ── Render Alerts ──
+async function runAndRenderPipeline() {
+ const store = await fetchStore();
+ const riskOrder = { high: 0, medium: 1, low: 2 };
+ const RISK_LABEL = { high: '高リスク', medium: '中リスク', low: '低リスク' };
+
+ const results = MEMBERS
+   .map(m => ({ member: m, ...assessRisk(m.id, store) }))
+   .sort((a, b) => riskOrder[a.riskLevel] - riskOrder[b.riskLevel]);
+
+ document.getElementById('alert-list').innerHTML = results.map(r => {
+   const tags = [
+     { label: `${Math.round(r.daysSinceLast)}日不参加`,  cls: r.daysSinceLast >= 14 ? 'danger' : r.daysSinceLast >= 7 ? 'warn' : 'ok' },
+     { label: `連続欠席${r.consecutiveMisses}回`,         cls: r.consecutiveMisses >= 5 ? 'danger' : r.consecutiveMisses >= 3 ? 'warn' : 'ok' },
+     { label: `参加${r.recentCheckins}回/月`,             cls: r.recentCheckins < 4 ? 'warn' : 'ok' },
+     { label: `感謝された${r.thanksReceived}回`,          cls: r.thanksReceived === 0 ? 'warn' : 'ok' },
+     { label: `つながり${r.connections}人`,               cls: r.connections === 0 ? 'danger' : r.connections <= 1 ? 'warn' : 'ok' },
+   ].map(t => `<span class="feature-tag ${t.cls}">${t.label}</span>`).join('');
+
+   return `
+     <div class="alert-card risk-${r.riskLevel}">
+       <div class="alert-avatar">${r.member.emoji}</div>
+       <div class="alert-body">
+         <div class="alert-name">
+           ${r.member.name}
+           <span class="alert-score">${RISK_LABEL[r.riskLevel]}</span>
+         </div>
+         <div class="alert-reason">${r.reasons.join(' / ')}</div>
+         <div class="alert-features">${tags}</div>
+       </div>
+     </div>
+   `;
+ }).join('');
+}
+
+
+// ── INIT ──
+async function initApp() {
+  const store = await fetchStore();
+  buildMembersFromStore(store);
+  await renderDashboard();
+}
+initApp();
+</script>
+
+
+</body>
+</html>
